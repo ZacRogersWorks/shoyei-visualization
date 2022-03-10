@@ -1,0 +1,82 @@
+@import url(https://fonts.googleapis.com/css2?family=Gugi&display=swap);
+*
+{
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body
+{
+    color: white;
+    font-family: 'Gugi', cursive;
+    background-color: black;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.webgl
+{
+    position: fixed;
+    top: 0;
+    left: 0;
+    outline: none;
+}
+
+.container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    align-items: center;
+    position: relative;
+}
+
+#title {
+    position: absolute;
+    top: 4rem;
+    font-size: 3rem;
+}
+#icon {
+    margin-bottom: 2rem;
+    display: none;
+    animation-duration: 2s;
+    animation-name: bounce;
+    animation-iteration-count: infinite;
+    transition: all ease-in-out;
+}
+
+@keyframes bounce {
+    from {
+        transform: translateY(0px)
+    }
+    50% {
+        transform: translateY(10px)
+    }
+    to {
+        transform: translateY(0px)
+    }
+}
+
+#audio {
+    visibility: hidden;
+}
+
+#play-btn {
+    background: none;
+    color: white;
+    border: 5px solid white;
+    border-radius: 24px;
+    width: 100px;
+    height: 50px;
+    z-index: 5;
+    margin-bottom: 3rem;
+}
+
+#play-btn:hover {
+    cursor: pointer;
+}
+
+/*# sourceMappingURL=main.css.map*/
