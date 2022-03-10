@@ -3,6 +3,7 @@
 {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 html,
@@ -22,6 +23,7 @@ body
     top: 0;
     left: 0;
     outline: none;
+    z-index: 0;
 }
 
 .container {
@@ -37,7 +39,8 @@ body
 #title {
     position: absolute;
     top: 4rem;
-    font-size: 3rem;
+    font-size: 4rem;
+    text-align: center;
 }
 #icon {
     margin-bottom: 2rem;
@@ -64,19 +67,35 @@ body
     visibility: hidden;
 }
 
+.play-container {
+    position: absolute;
+    bottom: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 #play-btn {
     background: none;
     color: white;
-    border: 5px solid white;
+    border: 1px solid white;
     border-radius: 24px;
     width: 100px;
     height: 50px;
     z-index: 5;
     margin-bottom: 3rem;
+    transition: all .1s ease-in-out;
 }
 
 #play-btn:hover {
     cursor: pointer;
+    border: 3px solid #0dd3d0;
+    color: #0dd3d0;
+}
+
+#play-btn:active {
+    border: 1px solid #f50083;
+    color: #f50083;
 }
 
 /*# sourceMappingURL=main.css.map*/
