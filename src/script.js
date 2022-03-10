@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { Lensflare, LensflareElement } from 'three/examples/jsm/objects/Lensflare.js';
+import anime from 'animejs/lib/anime.min.js'
 import * as dat from 'lil-gui'
 import { mapLinear } from 'three/src/math/MathUtils'
 import galaxyVertexShader from './shaders/galaxy/vertex.glsl'
@@ -15,31 +16,52 @@ const playBtn = document.getElementById('play-btn')
 const icon = document.getElementById('icon')
 
 // Audio Play Button
-  let isPlaying = false;
-  playBtn.innerText = 'Start'
+let isPlaying = false;
+playBtn.innerText = 'Start'
 
-  function playPause() {
+function playPause() {
     if (isPlaying) {
-      audio.pause();
-      playBtn.innerText = 'Play'
-      isPlaying = false
-      icon.style.display = 'none'
+        audio.pause();
+        playBtn.innerText = 'Play'
+        isPlaying = false
+        icon.style.display = 'none'
     } else {
-      audio.play();
-      isPlaying = true
-      playBtn.innerText = 'Pause'
+        audio.play();
+        isPlaying = true
+        playBtn.innerText = 'Pause'
         icon.style.display = 'block'
     }
-  }
-  playBtn.addEventListener('click', playPause)
+}
+playBtn.addEventListener('click', playPause)
 
 playBtn.addEventListener('click', () => {
     /**
      * Base
      */
+
+
+
     // Debug
     const gui = new dat.GUI()
-    gui.hide()
+    // gui.hide()
+
+    // Loaders //
+    const loadingManager = new THREE.LoadingManager(
+        // Loaded
+        () => {
+            anime({
+                
+            })
+        },
+
+        // Progress
+        () => {
+            console.log('progress')
+        }
+    )
+    const textureLoader = new THREE.TextureLoader(loadingManager)
+
+
 
     // Audio Visualizer //
     const ctx = new AudioContext()
@@ -56,6 +78,56 @@ playBtn.addEventListener('click', () => {
 
     // Scene
     const scene = new THREE.Scene()
+
+    // Rotating group
+    const group = new THREE.Group()
+
+    // Loading Plane
+    // const loadGeo = new THREE.PlaneGeometry(200, 200, 1, 1)
+    // const loadMat = new THREE.ShaderMaterial({
+    //     transparent: true,
+    //     uniforms:
+    //     {
+    //         uAlpha: { value: 1 }
+    //     },
+    //     vertexShader: `
+    //         void main()
+    //         {
+    //             gl_Position = vec4(position, 1.0);
+    //         }
+    //     `,
+    //     fragmentShader: `
+    //         uniform float uAlpha;
+    //         void main()
+    //         {
+    //             gl_FragColor = vec4(0.0, 0.0, 0.0, uAlpha);
+    //         }
+    //     `
+    // })
+    // const loadMesh = new THREE.Mesh(loadGeo, loadMat)
+    // loadMesh.rotation.y = -0.80
+    // loadMesh.position.x = -5.2
+    // scene.add(loadMesh)
+
+    // gui.add(loadMesh.rotation, 'y').min(-10).max(10).step(.001).name('Loading Rotate')
+    // gui.add(loadMesh.position, 'x').min(-50).max(50).step(.001).name('Loading Position x')
+    // gui.add(loadMesh.position, 'z').min(-50).max(50).step(.001).name('Loading Position z')
+
+    // Background Plane
+    const bgGeo = new THREE.PlaneGeometry(150, 150)
+    const bgTexture = textureLoader.load('background.jpeg')
+    const bgMat = new THREE.MeshBasicMaterial({ map: bgTexture })
+    const bgMesh = new THREE.Mesh(bgGeo, bgMat)
+    bgMesh.rotation.y = -0.58
+    bgMesh.position.x = 15
+    bgMesh.position.z = -50
+
+    scene.add(bgMesh)
+    group.add(bgMesh)
+
+    gui.add(bgMesh.rotation, 'y').min(-10).max(10).step(.001).name('Background Rotate')
+    gui.add(bgMesh.position, 'x').min(-50).max(50).step(.001).name('Background Position x')
+    gui.add(bgMesh.position, 'z').min(-50).max(50).step(.001).name('Background Position z')
 
     /**
      * Galaxy
@@ -170,22 +242,21 @@ playBtn.addEventListener('click', () => {
 
 
     // ** Space Ship ** 
-    const group = new THREE.Group()
-  
 
-    const textureLoader = new THREE.TextureLoader()
+
+
     const bakedTexture = textureLoader.load('Challenger_Blue.png')
     bakedTexture.flipY = false
     bakedTexture.encoding = THREE.sRGBEncoding
     const bakedMaterial = new THREE.MeshStandardMaterial({ map: bakedTexture })
 
-    
+
     // Draco loader
-    const dracoLoader = new DRACOLoader()
+    const dracoLoader = new DRACOLoader(loadingManager)
     dracoLoader.setDecoderPath('draco/')
 
     // GLTF loader
-    const gltfLoader = new GLTFLoader()
+    const gltfLoader = new GLTFLoader(loadingManager)
     gltfLoader.setDRACOLoader(dracoLoader)
 
     let gltfModel = new THREE.Object3D()
@@ -218,7 +289,7 @@ playBtn.addEventListener('click', () => {
     })
 
     scene.add(group)
-  
+
 
     gui.add(gltfParams, 'rotateX').min(0).max(10).step(.001).name('GLTF Rotate X').onFinishChange(() => gltfModel.scene.rotation.x = gltfParams.rotateX)
     gui.add(gltfParams, 'rotateY').min(0).max(10).step(.001).name('GLTF Rotate Y').onFinishChange(() => gltfModel.scene.rotation.y = gltfParams.rotateY)
@@ -227,57 +298,20 @@ playBtn.addEventListener('click', () => {
     gui.add(gltfParams, 'positionY').min(-10).max(10).step(.01).name('GLTF Position Y').onChange(() => gltfModel.scene.position.y = gltfParams.positionY)
     gui.add(gltfParams, 'positionZ').min(-10).max(10).step(.01).name('GLTF Position Z').onChange(() => gltfModel.scene.position.z = gltfParams.positionZ)
 
-    //** Fire **/
-    // const fireGeo = new THREE.ConeGeometry(.01, .1, 7);
-    // const fireMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
-    // const fire = new THREE.Mesh(fireGeo, fireMat);
-    // fire.rotation.set(-4.751, -.08, -.45)
-    // fire.position.set(-2.57, 0.4, 2.48)
-    // fire.receiveShadow = true
-    // scene.add(fire);
-
-
-    // gui.add(fire.rotation, 'x').min(-10).max(10).step(.001).name('Fire Rotation X')
-    // gui.add(fire.rotation, 'y').min(-10).max(10).step(.001).name('Fire Rotation y')
-    // gui.add(fire.rotation, 'z').min(-10).max(10).step(.001).name('Fire Rotation z')
-    // gui.add(fire.position, 'x').min(-10).max(10).step(.01).name('Fire Position X')
-    // gui.add(fire.position, 'y').min(-10).max(10).step(.01).name('Fire Position y')
-    // gui.add(fire.position, 'z').min(-10).max(10).step(.01).name('Fire Position z')
-
     // ** Lens Flare **//
-    const textureFlare0 = textureLoader.load( "lensflare4.png" );
+    const textureFlare0 = textureLoader.load("lensflare4.png");
     const lensflare = new Lensflare();
 
-    lensflare.addElement( new LensflareElement( textureFlare0, 512, 0 ) );
+    lensflare.addElement(new LensflareElement(textureFlare0, 512, 0));
 
     //** Lights **/
     const pointLight = new THREE.PointLight(0xffffff, 20)
     pointLight.position.set(-2.57, 0.39, 2.46)
     pointLight.castShadow = true;
     scene.add(pointLight)
-    pointLight.add( lensflare );
+    pointLight.add(lensflare);
     group.add(pointLight)
 
-    const lightTarget = new THREE.Object3D()
-    lightTarget.position.set(-2.57, 0.39, 2.46)
-
-    const spotLight = new THREE.SpotLight(0xffffff);
-    spotLight.position.set(0, 0, 0)
-    spotLight.castShadow = true;
-    spotLight.shadow.mapSize.width = 1024;
-    spotLight.shadow.mapSize.height = 1024;
-    
-    spotLight.shadow.camera.near = 500;
-    spotLight.shadow.camera.far = 4000;
-    spotLight.shadow.camera.fov = 30;
-    scene.add(spotLight)
-
-    spotLight.target = lightTarget
-    scene.add(spotLight.target)
-    console.log(spotLight)
-    // const spotLightHelper = new THREE.SpotLightHelper(spotLight);
-    // scene.add(spotLightHelper);
-    gui.add(spotLight, 'intensity').min(0).max(1000).step(1).name('Light Intensity')
     /**
      * Sizes
      */
@@ -317,6 +351,7 @@ playBtn.addEventListener('click', () => {
 
     // Controls
     const controls = new OrbitControls(camera, canvas)
+    controls.enableDamping = true
     controls.enabled = false
     controls.autoRotate = true
     controls.autoRotateSpeed = .025
