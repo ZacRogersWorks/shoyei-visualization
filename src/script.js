@@ -43,7 +43,7 @@ playBtn.addEventListener('click', () => {
 
     // Debug
     const gui = new dat.GUI()
-    // gui.hide()
+    gui.hide()
 
     // Loaders //
     const loadingManager = new THREE.LoadingManager(
